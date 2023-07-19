@@ -9,7 +9,7 @@ import numpy as np
 import csv
 
 
-batch_size = 64
+batch_size = 256
 learning_rate = 0.001
 num_epochs = 25
 train_data = []
@@ -104,30 +104,8 @@ test_labels = np.array(test_labels)
 print(f'Number of the training : {len(train_data)}')
 print(f'Number of the testing : {len(test_data)}')
 # Number of the training : 240
-# Number of the testing : 130
+# Number of the testing : 129
 
-
-'''
-def plot_images(images):
-
-    n_images = len(images)
-
-    rows = int(np.sqrt(n_images))
-    cols = int(np.sqrt(n_images))
-
-    fig = plt.figure()
-    for i in range(rows*cols):
-        ax = fig.add_subplot(rows, cols, i+1)
-        ax.imshow(images[i].view(32, 32, 3).cpu().numpy(), cmap='bone')
-        ax.axis('off')
-
-N_IMAGES = 25
-
-images = [image for image, label in [train_data[i] for i in range(N_IMAGES)]]
-images = [(image * 0.5) + 0.5 for image in images]
-
-plot_images(images)
-'''
 train_data = torch.Tensor(train_data)
 train_labels = torch.LongTensor(train_labels)
 
@@ -217,4 +195,71 @@ for epoch in range(num_epochs):
         accuracy = correct / len(test_loader.dataset)
         print(f"Epoch [{epoch+1}/{num_epochs}], Test Loss: {avg_loss:.4f}, Test Accuracy: {accuracy:.4f}")
 
+
 torch.save(model.state_dict(), 'tut1-model.pt')
+
+'''自定义验证'''
+
+ver_data = []
+ver_labels = []
+
+'''
+# 最顶部
+with open('test/top/2023_0714_20_13_00.csv', 'r') as file:
+    reader = csv.reader(file)
+
+    rows = list(reader)
+
+    # 遍历每一行数据，忽略最后一行
+    for row in rows[:-1]:
+        row_data = list(map(int, row[1:-1]))
+        ver_data.append(row_data)
+        ver_labels.append(3)
+'''
+
+'''
+# 空手
+with open('test/bare/2023_0714_20_11_24.csv', 'r') as file:
+    reader = csv.reader(file)
+
+    for row in reader:
+        row_data = list(map(int, row[1:-1]))
+        ver_data.append(row_data)
+        ver_labels.append(0)
+'''
+
+'''
+# 最底部
+with open('test/bottom/2023_0714_20_15_21.csv', 'r') as file:
+    reader = csv.reader(file)
+
+    for row in reader:
+        row_data = list(map(int, row[1:-1]))
+        ver_data.append(row_data)
+        ver_labels.append(1)
+'''
+
+# 中间
+with open('test/mid/2023_0714_20_14_11.csv', 'r') as file:
+    reader = csv.reader(file)
+
+    for row in reader:
+        row_data = list(map(int, row[1:-1]))
+        ver_data.append(row_data)
+        ver_labels.append(2)
+
+ver_data = np.array(ver_data)
+ver_labels = np.array(ver_labels)
+
+ver_data = torch.Tensor(ver_data)
+ver_labels = torch.LongTensor(ver_labels)
+
+ver_dataset = TensorDataset(ver_data, ver_labels)
+ver_loader = DataLoader(ver_dataset, batch_size=batch_size)
+
+with torch.no_grad():
+    for inputs, targets in ver_loader:
+        inputs, targets = inputs.to(device), targets.to(device)
+        ver_outputs = model(inputs)
+
+print(ver_outputs.argmax(1))
